@@ -1,0 +1,33 @@
+MVP for HODOR (IAM) 
+* Server Rendered Login, Signup, Error, MFA, SSO,  OTP, Email Verification Page *
+* OpenID connect JWT based authentication *
+* Put token on HTML-only cookie to secure ourselves from  XSRF CSRF attacks *
+* Relationship Based Access using OpenFGA (Reference from Zanzibar) *
+* Block on Multiple Failed Login attempts *
+* Forgot Password, Send Mail and Reset Password Link *
+* Send Invite to share access*
+* Mobile Number OTP, Email/Pwd, Google, Github, Twitter Based Login options*
+* Notification to reset passwrd after every 30 days*
+* Session Lifetime 1hr and Refresh token 30 days.*
+* PAT token *
+* API access to public APIs through Registration Flow *
+* Inventory management example *
+* Google Drive clone example *
+* Ecommerce example *
+* Support KYC flow *
+* Support Parent Child Organization
+* Support Change Password and Profile Settings option
+* Invite User Support
+* API Gateway for IP address filtering and Fraud Detection **
+* Cache implementation for quick response DiceDB integration **
+* LLM integration to detect fraud IPs and track Login activity like last login, recent logins, time spent on browser **
+* Debezium Based Read System for Auditing Purpose 
+* Session Tracking on Multiple Ddevice and Force Logout option **
+* Remember Me option **
+* Whatsapp based verification system **
+* Onboarding Flow to collect user data and preferences **
+* SDK for Backend and Frontend
+* On Frontend handle frontend related things like opening modal, sign in option etc
+* Send Geolocation on suspicious activity **
+* Automation and Stress Testing
+* Cache eviction for Particular user or organization
