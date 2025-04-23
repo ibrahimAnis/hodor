@@ -1,111 +1,86 @@
-version: '3.8'
-
-# volumes:
-#  postgres_data:
-#    driver: local
+version: "3.8"
 
 services:
-  postgres:
-    image: postgres:14
-    container_name: postgres
- #   volumes:
- #     - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U keycloak" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5  
-    ports:
-      - 5433:5432
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.1
-    container_name: keycloak
-    command:
-      - start-dev
-    environment:
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: password
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: password
-      KC_DB_URL_HOST: postgres
-      KC_DB_URL_DATABASE: keycloak
-      KC_DB_SCHEMA: public
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: password
-      KC_HOSTNAME_STRICT: 'false'
-      KC_HTTP_ENABLED: 'true'
-      KC_HOSTNAME_ADMIN: localhost
-      KC_HOSTNAME: localhost
-      KC_SPI_EVENTS_LISTENER_OPENFGA_API_URL: http://openfga:8080
-      KC_LOG_LEVEL: INFO, com.twogenidentity.keycloak:debug
-    ports:
-      - 9080:8080
-      - 8443:8443
-    volumes:
-      - $PWD/target/keycloak-openfga-event-publisher.jar:/opt/keycloak/providers/keycloak-openfga-event-publisher.jar
-    depends_on:
-      postgres:
-        condition: service_completed_successfully
-      openfga:
-        condition: service_completed_successfully
-    networks:
-      default:
-        aliases:
-          -  keycloak
-
-  postgres-openfga:
-    image: postgres:14
-    container_name: postgres-openfga
-    command: postgres -c 'max_connections=100'
-    networks:
-      - default
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   migrate:
-    depends_on:
-      postgres:
-        condition: service_healthy
-    image: openfga/openfga:v1.5.5
+    image: openfga/openfga:latest
     container_name: migrate
     environment:
       - OPENFGA_DATASTORE_ENGINE=postgres
-      - OPENFGA_DATASTORE_URI=postgres://postgres:password@postgres-openfga:5432/postgres?sslmode=disable
+      - OPENFGA_DATASTORE_URI=postgres://openfga:openfga@54.175.46.253:5432/openfga_db?sslmode=require
     command: migrate
     networks:
-      - default
-  
+      - hodor-network
+
   openfga:
     depends_on:
       migrate:
         condition: service_completed_successfully
-    image: openfga/openfga:v1.5.5
-    container_name: openfga
+    image: openfga/openfga:latest
+    container_name: openfga-container
     command: run
     environment:
       - OPENFGA_DATASTORE_ENGINE=postgres
-      - OPENFGA_DATASTORE_URI=postgres://postgres:password@postgres-openfga:5432/postgres?sslmode=disable
+      - OPENFGA_DATASTORE_URI=postgres://openfga:openfga@54.175.46.253:5432/openfga_db?sslmode=require
       - OPENFGA_DATASTORE_MAX_OPEN_CONNS=100
+      - OPENFGA_HTTP_CORS_ALLOW_ORIGINS=*
+      - OPENFGA_LOG_LEVEL=error
+    networks:
+      - hodor-network
+    ports:
+      - "8080:8080" #http
+      - "3000:3000" #playground
     healthcheck:
-      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=openfga:8081"]
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=127.0.0.1:8081"]
       interval: 3s
       timeout: 30s
       retries: 3
+
+  openfga-import:
+    depends_on:
+      openfga:
+        condition: service_healthy
+    image: openfga/cli:v0.5.1
+    container_name: openfga-import
+    restart: "no"
+    command: "store create --name anees-labs --api-url http://openfga:8080 --model /tmp/model.dsl"
     networks:
-      - default
+      - hodor-network
+    volumes:
+      - $PWD/openfga:/tmp
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kc-container
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://54.175.46.253:5432/keycloak?sslmode=require
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_URL: http://keycloak:8081
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: none
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./themes:/opt/keycloak/themes
+      # - ./certs:/opt/keycloak/certs
+      - ./providers:/opt/keycloak/providers
     ports:
-      - "8080:8080" #http
-      - "8081:8081" #grpc
-      - "3000:3000" #playground
+      - "8081:8081"
+    networks:
+      - hodor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    command: /opt/keycloak/bin/kc.sh start-dev --http-port=8081 --spi-theme-static-max-age=-1 --spi-theme-cache-themes=false --spi-theme-cache-templates=false --spi-required-action-VERIFY_EMAIL_CODE-code-length=6 --spi-required-action-VERIFY_EMAIL_CODE-code-symbols=0123456789
+
+networks:
+  hodor-network:
+    driver: bridge

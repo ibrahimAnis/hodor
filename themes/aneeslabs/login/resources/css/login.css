@@ -1,0 +1,100 @@
+/* Base Styles */
+body {
+  font-family: 'Inter', sans-serif;
+  transition: background 0.7s ease, color 0.3s ease;
+}
+
+/* Glassmorphism */
+.bg-white\/90 {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dark .bg-gray-900\/90 {
+  background: rgba(17, 24, 39, 0.9);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Input and Button Animations */
+input, button {
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+/* Dark Mode Overrides */
+.dark input {
+  color: #f3f4f6;
+}
+
+.dark input::placeholder {
+  color: #9ca3af;
+}
+
+/* Accessibility Enhancements */
+[aria-label] {
+  cursor: pointer;
+}
+
+/* Micro-Animations */
+.animate__animated {
+  --animate-duration: 0.7s;
+}
+
+.animate__bounceIn {
+  --animate-duration: 0.9s;
+}
+
+.animate__slideInDown, .animate__slideInUp {
+  --animate-duration: 0.8s;
+}
+
+/* Gradient Background */
+.bg-gradient-to-br {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899);
+}
+
+.dark .bg-gradient-to-br {
+  background: linear-gradient(135deg, #111827, #1f2937, #000);
+}
+
+/* Form Elements */
+input, button {
+  outline: none;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(243, 244, 246, 0.7) inset;
+}
+
+.dark input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(31, 41, 55, 0.7) inset;
+}
+
+/* Social Buttons */
+button img {
+  filter: brightness(0.9);
+}
+
+.dark button img {
+  filter: brightness(1.1);
+}
+
+/* Loading Spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

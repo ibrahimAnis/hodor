@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  keycloak:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://ec2-54-175-46-253.compute-1.amazonaws.com:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_URL: http://keycloak:8081
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: none
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./themes:/opt/keycloak/themes
+      # - ./certs:/opt/keycloak/certs
+      - ./providers:/opt/keycloak/providers
+    ports:
+      - "8081:8081"
+    networks:
+      - hodor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    command: /opt/keycloak/bin/kc.sh start-dev --http-port=8081 --spi-theme-static-max-age=-1 --spi-theme-cache-themes=false --spi-theme-cache-templates=false --spi-required-action-VERIFY_EMAIL_CODE-code-length=6 --spi-required-action-VERIFY_EMAIL_CODE-code-symbols=0123456789
+networks:
+  hodor-network:
+    external: true

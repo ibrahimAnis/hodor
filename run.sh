@@ -1,7 +1,1 @@
-docker pull openfga/openfga
-docker run -p 8080:8080 -p 3000:3000 openfga/openfga run
-curl -X POST 'localhost:8080/stores' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "name": "anees-labs"  
-}'
+./bin/kc.sh start-dev --http-port=8081 --spi-theme-static-max-age=-1 --spi-theme-cache-themes=false --spi-theme-cache-templates=false --spi-required-action-VERIFY_EMAIL_CODE-code-length=6 --spi-required-action-VERIFY_EMAIL_CODE-code-symbols=0123456789 

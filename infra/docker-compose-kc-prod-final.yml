@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB:
+      KC_DB_URL: jdbc:postgresql://localhost:5432/keycloak?ssl=false
+      KC_DB_USERNAME: ibrahimanees
+      KC_DB_PASSWORD: ibrahimanees
+      KC_HOSTNAME: keycloak.topbags.com
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_HTTP_ENABLED: "false"
+      KC_HTTPS_PORT: 8081
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/certs/keycloak.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/certs/keycloak.key
+      KC_PROXY: edge
+      KC_LOG_LEVEL: info
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      JAVA_OPTS_APPEND: "-Xms512m -Xmx2048m -XX:+UseG1GC"
+      KC_DB_POOL_INITIAL_SIZE: 5
+      KC_DB_POOL_MAX_SIZE: 20
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./themes:/opt/keycloak/themes
+      - ./certs:/opt/keycloak/certs
+      - ./providers:/opt/keycloak/providers
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hodor-network
+    command: start --optimized
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:8081/health/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+networks:
+  keycloak-network:
+    driver: bridge
