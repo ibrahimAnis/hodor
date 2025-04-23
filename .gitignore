@@ -5,4 +5,8 @@
 .project
 .DS_Store
 ./docker-compose.yml
+./init-keycloak.sql
+./init-openfga.sql
+./import.sh
+./run.sh
 
