@@ -2,8 +2,6 @@
 
 Centralized Authentication System using Keycloak, OpenFGA, and PostgreSQL.
 
-![Architecture Diagram](docs/architecture.png)
-
 ## Features
 
 * Single Sign-On (SSO)
