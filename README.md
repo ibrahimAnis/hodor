@@ -11,8 +11,6 @@ Centralized Authentication System using Keycloak, OpenFGA, and PostgreSQL.
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture.png)
-
 **Components**:
 
 1. **Clients**
@@ -66,7 +64,3 @@ This will start:
 ## Contributing
 
 Contributions are welcome! Please fork the repo, make your changes, and open a pull request.
-
-## License
-
-MIT
